@@ -251,7 +251,7 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("ka-GE", { day: "numeric", month: "short" });
 }
 
-function buildItinerary(form: FormData, dayTitles: string[], arrival: string, departure: string): ItineraryDay[] {
+function buildItinerary(form: FormData, dayTitles: readonly string[], arrival: string, departure: string): ItineraryDay[] {
   const start = new Date(form.startDate);
   const end = new Date(form.endDate);
   const diffTime = end.getTime() - start.getTime();
