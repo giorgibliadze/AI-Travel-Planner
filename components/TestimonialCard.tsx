@@ -1,58 +1,46 @@
-"use client";
-
-import { Star } from "lucide-react";
+import Image from "next/image";
+import { Star, Quote } from "lucide-react";
 import type { Testimonial } from "@/data/testimonials";
 
 interface TestimonialCardProps {
   testimonial: Testimonial;
 }
 
-const avatarColors = [
-  "from-rose-400 to-pink-600",
-  "from-blue-400 to-indigo-600",
-  "from-emerald-400 to-teal-600",
-  "from-amber-400 to-orange-500",
-  "from-purple-400 to-violet-600",
-  "from-cyan-400 to-sky-600",
-];
-
 export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
-  const colorIndex = parseInt(testimonial.id) % avatarColors.length;
-  const initials = testimonial.name.split(" ").map(n => n[0]).join("").slice(0, 2);
-
   return (
-    <div className="bg-white rounded-3xl p-7 shadow-sm border border-gray-100 h-full flex flex-col hover:shadow-md hover:-translate-y-1 transition-all duration-300 group">
-      {/* Top row: avatar + stars */}
-      <div className="flex items-start justify-between mb-5">
-        {/* Avatar with initials */}
-        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${avatarColors[colorIndex]} flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg`}>
-          {initials}
-        </div>
-        {/* Stars */}
-        <div className="flex gap-0.5">
-          {Array.from({ length: testimonial.rating }).map((_, i) => (
-            <Star key={i} size={13} className="fill-[#f4d03f] text-[#f4d03f]" />
-          ))}
-        </div>
+    <div className="relative p-6 rounded-3xl dark:bg-[#0d1117]/80 bg-white border dark:border-white/5 border-slate-200/80 shadow-lg hover:shadow-xl transition-shadow">
+      {/* Quote icon */}
+      <div className="absolute top-5 right-5 w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+        <Quote className="w-4 h-4 text-blue-500" />
       </div>
 
-      {/* Treatment badge */}
-      <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[#1e3a5f]/6 text-[#1e3a5f] mb-4 self-start">
-        {testimonial.treatment}
-      </span>
+      {/* Stars */}
+      <div className="flex gap-0.5 mb-4">
+        {Array.from({ length: testimonial.rating }).map((_, i) => (
+          <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
+        ))}
+      </div>
 
-      {/* Quote */}
-      <blockquote className="text-gray-600 text-sm leading-relaxed flex-1 mb-5 italic">
+      {/* Text */}
+      <p className="text-sm dark:text-slate-300 text-slate-600 leading-relaxed mb-5">
         &ldquo;{testimonial.text}&rdquo;
-      </blockquote>
+      </p>
 
       {/* Author */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-        <div>
-          <div className="font-bold text-[#0f172a] text-sm">{testimonial.name}</div>
-          <div className="text-xs text-gray-400 mt-0.5">{testimonial.location}</div>
+      <div className="flex items-center gap-3">
+        <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-blue-500/20">
+          <Image
+            src={testimonial.avatar}
+            alt={testimonial.name}
+            fill
+            className="object-cover"
+            sizes="40px"
+          />
         </div>
-        <div className="text-xs text-gray-400">{testimonial.date}</div>
+        <div>
+          <div className="text-sm font-semibold dark:text-white text-slate-900">{testimonial.name}</div>
+          <div className="text-xs dark:text-slate-400 text-slate-500">{testimonial.role} · {testimonial.destination}</div>
+        </div>
       </div>
     </div>
   );

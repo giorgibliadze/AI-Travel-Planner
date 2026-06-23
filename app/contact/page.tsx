@@ -1,116 +1,201 @@
-import type { Metadata } from "next";
-import BookingForm from "@/components/BookingForm";
-import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
+"use client";
 
-export const metadata: Metadata = {
-  title: "კონტაქტი და ვიზიტის დაჯავშნა",
-  description:
-    "დაჯავშნეთ ვიზიტი SmileElite-ში — ანუ რეკეთ +995 32 200-00-00 ან შეავსეთ ფორმა. უფასო კონსულტაცია ხელმისაწვდომია.",
-};
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Phone, MapPin, Send, ChevronDown, CheckCircle2, MessageSquare } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ContactPage() {
+  const { t } = useLanguage();
+  const c = t.contact;
+
+  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 1500));
+    setLoading(false);
+    setSubmitted(true);
+  };
+
+  const contactItems = [
+    { icon: Mail, label: c.emailLabel, value: "hello@tripnova.ge", sub: c.emailSub },
+    { icon: Phone, label: c.phoneLabel, value: "+995 32 200-00-00", sub: c.phoneSub },
+    { icon: MapPin, label: c.addressLabel, value: c.addressValue, sub: c.addressSub },
+  ];
+
   return (
-    <>
-      {/* Hero */}
-      <div className="relative pt-32 pb-24 overflow-hidden" style={{ background: "linear-gradient(135deg, #0a1628 0%, #0f2744 50%, #0d1f3a 100%)" }}>
-        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)", backgroundSize: "44px 44px" }} />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#f4d03f]">დაგვიკავშირდით</span>
-          <h1 className="text-5xl font-bold text-white mt-3 mb-5">დაჯავშნეთ ვიზიტი</h1>
-          <p className="text-white/60 text-lg max-w-2xl mx-auto leading-relaxed">
-            შეავსეთ ფორმა და ჩვენი გუნდი 2 საათის განმავლობაში დაადასტურებს ვიზიტს.
-          </p>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none">
-            <path d="M0 60L1440 60L1440 14C1200 44 960 60 720 44C480 28 240 0 0 14L0 60Z" fill="white" />
-          </svg>
-        </div>
+    <div className="min-h-screen dark:bg-[#050816] bg-[#F8FAFC] pt-24 pb-20">
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 -left-32 w-[500px] h-[500px] bg-blue-600 rounded-full filter blur-[160px] opacity-5" />
+        <div className="absolute bottom-1/4 -right-32 w-[400px] h-[400px] bg-teal-500 rounded-full filter blur-[160px] opacity-5" />
       </div>
 
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16">
+      <div className="relative max-w-6xl mx-auto px-4">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border dark:border-blue-500/20 border-blue-200 dark:bg-blue-500/10 bg-blue-50 text-blue-500 text-sm font-medium mb-5">
+            <MessageSquare className="w-3.5 h-3.5" />
+            {c.badge}
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black dark:text-white text-slate-900 mb-4">{c.title}</h1>
+          <p className="text-lg dark:text-slate-400 text-slate-500 max-w-xl mx-auto">{c.sub}</p>
+        </div>
 
-            {/* Form */}
-            <div>
-              <h2 className="text-2xl font-bold text-[#0f172a] mb-2">ვიზიტის მოთხოვნა</h2>
-              <p className="text-gray-500 mb-8 text-sm leading-relaxed">
-                პირველი ვიზიტი — უფასო კონსულტაციით. საბანკო ბარათი არ გჭირდებათ.
-              </p>
-              <BookingForm />
-            </div>
-
-            {/* Contact info */}
-            <div className="space-y-7">
-              <div>
-                <h2 className="text-2xl font-bold text-[#0f172a] mb-7">საკონტაქტო ინფორმაცია</h2>
-                <div className="space-y-4">
-                  {[
-                    { icon: Phone,  label: "ტელეფონი",   value: "+995 32 200-00-00", sub: "+995 599 00-00-00 (WhatsApp)", href: "tel:+995322000000" },
-                    { icon: Mail,   label: "ელ-ფოსტა",   value: "hello@smileelite.ge", sub: "ვპასუხობთ 2 საათში", href: "mailto:hello@smileelite.ge" },
-                    { icon: MapPin, label: "მისამართი",   value: "რუსთაველის გამზ. 14", sub: "თბილისი 0108, საქართველო", href: "#map" },
-                    { icon: Clock,  label: "სამუშ. საათები", value: "ორშ–პარ: 09:00 – 19:00", sub: "შაბ: 10:00 – 16:00 · კვი: დასვენება", href: undefined },
-                  ].map(({ icon: Icon, label, value, sub, href }) => (
-                    <div key={label} className="flex items-start gap-4 p-5 rounded-2xl bg-gradient-to-br from-[#f8fafc] to-white border border-gray-100 hover:border-[#1e3a5f]/20 hover:shadow-sm transition-all">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8e] flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <Icon size={16} className="text-white" />
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-bold text-[#b8962e] uppercase tracking-widest mb-0.5">{label}</div>
-                        {href ? (
-                          <a href={href} className="font-semibold text-[#0f172a] hover:text-[#1e3a5f] transition-colors text-sm">{value}</a>
-                        ) : (
-                          <div className="font-semibold text-[#0f172a] text-sm">{value}</div>
-                        )}
-                        <div className="text-xs text-gray-400 mt-0.5 leading-relaxed">{sub}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* WhatsApp CTA */}
-              <a
-                href="https://wa.me/995599000000?text=გამარჯობა!%20მინდა%20ვიზიტის%20დაჯავშნა%20SmileElite-ში."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 p-6 rounded-2xl bg-[#25d366] hover:bg-[#1db954] transition-colors shadow-lg shadow-green-500/15 group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <MessageCircle size={22} className="text-white fill-white" />
+        <div className="grid lg:grid-cols-5 gap-8 mb-16">
+          <div className="lg:col-span-2 space-y-4">
+            {contactItems.map((item) => (
+              <div key={item.label} className="flex items-start gap-4 p-5 rounded-2xl dark:bg-[#0d1117]/80 bg-white border dark:border-white/5 border-slate-200/80 shadow-md">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <item.icon className="w-5 h-5 text-blue-500" />
                 </div>
                 <div>
-                  <div className="font-bold text-white text-base">WhatsApp-ზე დაწერეთ</div>
-                  <div className="text-green-100 text-sm">ჩვეულებრივ რამდენიმე წუთში ვპასუხობთ</div>
+                  <div className="text-xs dark:text-slate-400 text-slate-500 font-medium mb-0.5">{item.label}</div>
+                  <div className="text-sm font-semibold dark:text-white text-slate-900">{item.value}</div>
+                  <div className="text-xs dark:text-slate-500 text-slate-400">{item.sub}</div>
                 </div>
-              </a>
+              </div>
+            ))}
 
-              {/* Map placeholder */}
-              <div id="map" className="rounded-3xl overflow-hidden border border-gray-200 h-60 relative" style={{ background: "linear-gradient(135deg, #e8f0fe, #dce8f0)" }}>
-                <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "linear-gradient(rgba(30,58,95,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(30,58,95,0.4) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#1e3a5f] flex items-center justify-center shadow-xl">
-                    <MapPin size={22} className="text-white" />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-bold text-[#1e3a5f] text-sm">რუსთაველის გამზ. 14</p>
-                    <p className="text-gray-500 text-xs">თბილისი, საქართველო</p>
-                  </div>
-                  <a
-                    href="https://maps.google.com/?q=14+Rustaveli+Avenue,+Tbilisi,+Georgia"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-full bg-[#1e3a5f] text-white text-xs font-semibold hover:bg-[#2d5a8e] transition-colors shadow-lg"
-                  >
-                    Google Maps-ზე გახსნა
-                  </a>
-                </div>
+            <div className="rounded-2xl overflow-hidden border dark:border-white/5 border-slate-200/80 shadow-md h-48 relative dark:bg-[#0d1117] bg-slate-100 flex items-center justify-center">
+              <div className="absolute inset-0 dark:bg-gradient-to-br dark:from-blue-900/20 dark:to-teal-900/20 bg-gradient-to-br from-blue-50 to-teal-50" />
+              <div className="relative text-center">
+                <MapPin className="w-8 h-8 dark:text-blue-400 text-blue-400 mx-auto mb-2" />
+                <p className="text-sm font-semibold dark:text-white text-slate-700">{c.addressSub}</p>
+                <p className="text-xs dark:text-slate-400 text-slate-500">{c.addressValue}</p>
               </div>
             </div>
           </div>
+
+          <div className="lg:col-span-3">
+            <div className="rounded-3xl dark:bg-[#0d1117]/80 bg-white border dark:border-white/5 border-slate-200/80 shadow-xl p-7">
+              <h2 className="text-xl font-bold dark:text-white text-slate-900 mb-6">{c.formTitle}</h2>
+
+              <AnimatePresence mode="wait">
+                {submitted ? (
+                  <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
+                    <div className="w-16 h-16 rounded-full bg-teal-500/10 flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-teal-500" />
+                    </div>
+                    <h3 className="text-xl font-bold dark:text-white text-slate-900 mb-2">{c.successTitle}</h3>
+                    <p className="dark:text-slate-400 text-slate-500 text-sm">{c.successSub}</p>
+                  </motion.div>
+                ) : (
+                  <motion.form key="form" onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold dark:text-slate-400 text-slate-600 uppercase tracking-wide mb-1.5">{c.nameLabel}</label>
+                        <input
+                          type="text"
+                          required
+                          value={form.name}
+                          onChange={(e) => setForm({ ...form, name: e.target.value })}
+                          placeholder={c.namePlaceholder}
+                          className="w-full px-4 py-3 rounded-2xl dark:bg-white/5 bg-slate-50 dark:border-white/10 border border-slate-200 dark:text-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold dark:text-slate-400 text-slate-600 uppercase tracking-wide mb-1.5">{c.emailFormLabel}</label>
+                        <input
+                          type="email"
+                          required
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          placeholder="email@example.com"
+                          className="w-full px-4 py-3 rounded-2xl dark:bg-white/5 bg-slate-50 dark:border-white/10 border border-slate-200 dark:text-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/50 transition-all text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold dark:text-slate-400 text-slate-600 uppercase tracking-wide mb-1.5">{c.subjectLabel}</label>
+                      <input
+                        type="text"
+                        value={form.subject}
+                        onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                        placeholder={c.subjectPlaceholder}
+                        className="w-full px-4 py-3 rounded-2xl dark:bg-white/5 bg-slate-50 dark:border-white/10 border border-slate-200 dark:text-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/50 transition-all text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold dark:text-slate-400 text-slate-600 uppercase tracking-wide mb-1.5">{c.messageLabel}</label>
+                      <textarea
+                        required
+                        rows={5}
+                        value={form.message}
+                        onChange={(e) => setForm({ ...form, message: e.target.value })}
+                        placeholder={c.messagePlaceholder}
+                        className="w-full px-4 py-3 rounded-2xl dark:bg-white/5 bg-slate-50 dark:border-white/10 border border-slate-200 dark:text-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/50 transition-all text-sm resize-none"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold text-sm hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {loading ? (
+                        <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {c.sendingBtn}</>
+                      ) : (
+                        <><Send className="w-4 h-4" /> {c.sendBtn}</>
+                      )}
+                    </button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
-      </section>
-    </>
+
+        <div className="max-w-3xl mx-auto" id="faq">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-black dark:text-white text-slate-900 mb-3">{c.faqTitle}</h2>
+            <p className="dark:text-slate-400 text-slate-500 text-sm">{c.faqSub}</p>
+          </div>
+
+          <div className="space-y-3">
+            {t.faqs.map((faq, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="rounded-2xl dark:bg-[#0d1117]/80 bg-white border dark:border-white/5 border-slate-200/80 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between p-5 text-left"
+                >
+                  <span className="text-sm font-semibold dark:text-white text-slate-900 pr-4">{faq.q}</span>
+                  <motion.div animate={{ rotate: openFaq === i ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown className="w-4 h-4 dark:text-slate-400 text-slate-400 flex-shrink-0" />
+                  </motion.div>
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 pb-5 text-sm dark:text-slate-400 text-slate-500 leading-relaxed border-t dark:border-white/5 border-slate-100 pt-3">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

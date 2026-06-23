@@ -1,88 +1,89 @@
+"use client";
+
 import Link from "next/link";
-import { Phone, Mail, MapPin, Share2, MessageCircle, Play } from "lucide-react";
+import { Plane, Mail, Phone, MapPin, Share2, X, Rss, Globe } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
-  return (
-    <footer className="bg-[#0a1628] text-white">
-      {/* Top accent line */}
-      <div className="h-1 bg-gradient-to-r from-[#1e3a5f] via-[#b8962e] to-[#1e3a5f]" />
+  const { t } = useLanguage();
+  const fl = t.footer.links;
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+  const footerLinks = {
+    platform: [
+      { label: fl.planner, href: "/planner" },
+      { label: fl.destinations, href: "/destinations" },
+      { label: fl.pricing, href: "/pricing" },
+      { label: fl.reviews, href: "/reviews" },
+    ],
+    support: [
+      { label: fl.contactLink, href: "/contact" },
+      { label: fl.faq, href: "/contact#faq" },
+      { label: fl.blog, href: "/blog" },
+      { label: fl.api, href: "/api-docs" },
+    ],
+    legal: [
+      { label: fl.privacy, href: "/privacy" },
+      { label: fl.terms, href: "/terms" },
+      { label: fl.cookies, href: "/cookies" },
+    ],
+  };
+
+  return (
+    <footer className="relative dark:bg-[#030712] bg-slate-900 text-white overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full filter blur-[120px] opacity-5 pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full filter blur-[120px] opacity-5 pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8e] flex items-center justify-center">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2C8.5 2 7 4.5 7 7c0 1.5.5 3 1 4.5C9 14 9 16 9 18c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2 0-2 0-4 1-6.5.5-1.5 1-3 1-4.5 0-2.5-1.5-5-5-5z" fill="white" />
-                </svg>
+          <div className="lg:col-span-2">
+            <Link href="/" className="flex items-center gap-2.5 mb-5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-teal-500 flex items-center justify-center">
+                <Plane className="w-4 h-4 text-white" strokeWidth={2.5} />
               </div>
-              <div>
-                <div className="font-bold text-lg leading-tight">SmileElite</div>
-                <div className="text-xs text-[#b8962e] tracking-widest font-medium">DENTAL CLINIC</div>
-              </div>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              პრემიუმ სტომატოლოგია თბილისის გულში. უახლესი ტექნოლოგია და გულთბილი მოვლა თქვენი სრულყოფილი ღიმილისთვის.
+              <span className="text-xl font-bold text-white">
+                Trip<span className="gradient-text">Nova</span> AI
+              </span>
+            </Link>
+            <p className="text-slate-400 text-sm leading-relaxed mb-6 max-w-xs">
+              {t.footer.tagline}
             </p>
-            <div className="flex gap-3">
-              {[
-                { icon: Share2, href: "#", label: "Instagram" },
-                { icon: MessageCircle, href: "#", label: "Facebook" },
-                { icon: Play, href: "#", label: "YouTube" },
-              ].map(({ icon: Icon, href, label }) => (
+            <div className="flex items-center gap-3">
+              {[Share2, X, Rss, Globe].map((Icon, i) => (
                 <a
-                  key={label}
-                  href={href}
-                  aria-label={label}
-                  className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#b8962e] transition-colors duration-200"
+                  key={i}
+                  href="#"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-600/20 hover:border-blue-500/30 transition-colors group"
                 >
-                  <Icon size={15} />
+                  <Icon className="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Services */}
+          {/* Platform Links */}
           <div>
-            <h3 className="font-semibold text-white mb-5 text-xs uppercase tracking-widest text-[#b8962e]">სერვისები</h3>
+            <h4 className="text-sm font-semibold text-white mb-4">{t.footer.platform}</h4>
             <ul className="space-y-2.5">
-              {[
-                "კბილების გათეთრება",
-                "კბილის იმპლანტი",
-                "ინვიზალაინი",
-                "ფაინ-ჩინური ვინირები",
-                "არხების მკურნალობა",
-                "კბილის გვირგვინი",
-                "პროფესიონალური წმენდა",
-                "კომპოზიტური ბონდინგი",
-              ].map((service) => (
-                <li key={service}>
-                  <Link href="/services" className="text-gray-400 text-sm hover:text-[#b8962e] transition-colors flex items-center gap-2 group">
-                    <span className="w-1 h-1 rounded-full bg-[#b8962e]/40 group-hover:bg-[#b8962e] transition-colors flex-shrink-0" />
-                    {service}
+              {footerLinks.platform.map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href} className="text-sm text-slate-400 hover:text-white transition-colors">
+                    {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Links */}
+          {/* Support Links */}
           <div>
-            <h3 className="font-semibold text-white mb-5 text-xs uppercase tracking-widest text-[#b8962e]">ნავიგაცია</h3>
+            <h4 className="text-sm font-semibold text-white mb-4">{t.footer.support}</h4>
             <ul className="space-y-2.5">
-              {[
-                { label: "კლინიკის შესახებ", href: "/about" },
-                { label: "ჩვენი ექიმები", href: "/doctors" },
-                { label: "შედეგები", href: "/before-after" },
-                { label: "ფასები", href: "/pricing" },
-                { label: "კითხვები", href: "/faq" },
-                { label: "ვიზიტის დაჯავშნა", href: "/contact" },
-              ].map(({ label, href }) => (
-                <li key={label}>
-                  <Link href={href} className="text-gray-400 text-sm hover:text-[#b8962e] transition-colors flex items-center gap-2 group">
-                    <span className="w-1 h-1 rounded-full bg-[#b8962e]/40 group-hover:bg-[#b8962e] transition-colors flex-shrink-0" />
-                    {label}
+              {footerLinks.support.map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href} className="text-sm text-slate-400 hover:text-white transition-colors">
+                    {link.label}
                   </Link>
                 </li>
               ))}
@@ -91,44 +92,34 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold text-white mb-5 text-xs uppercase tracking-widest text-[#b8962e]">კონტაქტი</h3>
-            <ul className="space-y-4">
-              <li className="flex gap-3">
-                <MapPin size={15} className="text-[#b8962e] mt-0.5 flex-shrink-0" />
-                <span className="text-gray-400 text-sm leading-relaxed">რუსთაველის გამზ. 14, თბილისი 0108, საქართველო</span>
+            <h4 className="text-sm font-semibold text-white mb-4">{t.footer.contact}</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-2.5 text-sm text-slate-400">
+                <Mail className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                hello@tripnova.ge
               </li>
-              <li className="flex gap-3">
-                <Phone size={15} className="text-[#b8962e] mt-0.5 flex-shrink-0" />
-                <div className="text-sm space-y-1">
-                  <a href="tel:+995322000000" className="text-gray-400 hover:text-white transition-colors block">+995 32 200-00-00</a>
-                  <a href="tel:+995599000000" className="text-gray-400 hover:text-white transition-colors block">+995 599 00-00-00</a>
-                </div>
+              <li className="flex items-center gap-2.5 text-sm text-slate-400">
+                <Phone className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                +995 32 200-00-00
               </li>
-              <li className="flex gap-3">
-                <Mail size={15} className="text-[#b8962e] mt-0.5 flex-shrink-0" />
-                <a href="mailto:hello@smileelite.ge" className="text-gray-400 text-sm hover:text-white transition-colors">
-                  hello@smileelite.ge
-                </a>
+              <li className="flex items-center gap-2.5 text-sm text-slate-400">
+                <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                {t.footer.address}
               </li>
             </ul>
-
-            <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
-              <p className="text-[#b8962e] text-xs font-semibold uppercase tracking-wider mb-2">სამუშაო საათები</p>
-              <p className="text-sm text-white">ორშ–პარ: 09:00 – 19:00</p>
-              <p className="text-sm text-white">შაბ: 10:00 – 16:00</p>
-              <p className="text-sm text-gray-500">კვი: დასვენება</p>
-            </div>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} SmileElite Dental Clinic. ყველა უფლება დაცულია.
-          </p>
-          <p className="text-gray-600 text-xs">
-            ლიცენზია: საქართველოს ჯანდაცვის სამინისტრო · #DEN-2010-0042
-          </p>
+        {/* Bottom bar */}
+        <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-slate-500">{t.footer.copyright}</p>
+          <div className="flex items-center gap-4">
+            {footerLinks.legal.map((link) => (
+              <Link key={link.label} href={link.href} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
