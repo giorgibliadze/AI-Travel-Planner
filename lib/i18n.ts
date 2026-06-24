@@ -86,7 +86,7 @@ export const translations = {
       reviewsBadge: "გამოხმაურებები",
       reviewsTitle: "ჩვენი მომხმარებლები ამბობენ",
       ctaBadge: "✈️ დაიწყე ახლავე",
-      ctaH1: "შენი სიზმრიანი",
+      ctaH1: "შენი ოცნების",
       ctaH2: "მოგზაურობა",
       ctaH3: "იწყება აქ",
       ctaSub: "10,000-ზე მეტმა მოგზაურმა უკვე ენდო TripNova AI-ს. შემოგვიერთდი.",
