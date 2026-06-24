@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Plane, ChevronDown } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import type { Lang } from "@/lib/i18n";
 
 const langLabels: Record<Lang, string> = { ka: "KA", en: "EN", ru: "RU" };
@@ -15,6 +16,7 @@ const allLangs: Lang[] = ["ka", "en", "ru"];
 
 export default function Navbar() {
   const { t, lang, setLang } = useLanguage();
+  const { user, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -128,12 +130,27 @@ export default function Navbar() {
               </div>
 
               <Link
-                href="/planner"
+                href={user ? "/dashboard" : "/register"}
                 className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <Plane className="w-3.5 h-3.5" />
-                {t.nav.start}
+                {user ? t.nav.dashboard : t.nav.register}
               </Link>
+              {user ? (
+                <button
+                  onClick={() => void signOut()}
+                  className="hidden md:inline-flex px-3 py-2 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-slate-300 text-slate-600 text-sm font-semibold"
+                >
+                  {t.nav.logout}
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden md:inline-flex px-3 py-2 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-slate-300 text-slate-600 text-sm font-semibold"
+                >
+                  {t.nav.login}
+                </Link>
+              )}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="md:hidden p-2 rounded-xl dark:text-white text-slate-700 dark:hover:bg-white/10 hover:bg-slate-100 transition-colors"
@@ -191,11 +208,26 @@ export default function Navbar() {
               </div>
 
               <Link
-                href="/planner"
+                href={user ? "/dashboard" : "/register"}
                 className="mt-1 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-semibold text-center"
               >
-                {t.nav.startMobile}
+                {user ? t.nav.dashboard : t.nav.startMobile}
               </Link>
+              {user ? (
+                <button
+                  onClick={() => void signOut()}
+                  className="px-4 py-3 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-slate-300 text-slate-600 text-sm font-semibold text-center"
+                >
+                  {t.nav.logout}
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="px-4 py-3 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-slate-300 text-slate-600 text-sm font-semibold text-center"
+                >
+                  {t.nav.login}
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

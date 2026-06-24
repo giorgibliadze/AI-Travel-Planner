@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Calendar, Banknote, Users, Compass, Sparkles,
@@ -8,6 +9,11 @@ import {
   Car, Train, ChevronDown, ChevronUp, CloudSun, Wind,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
+import { type Lang } from "@/lib/i18n";
+
+type TravelStyle = "luxury" | "budget" | "adventure" | "family" | "romantic";
+type ApiTimelineType = "food" | "sightseeing" | "transport" | "leisure";
 
 interface FormData {
   destination: string;
@@ -15,7 +21,7 @@ interface FormData {
   endDate: string;
   budget: string;
   travelers: string;
-  style: string;
+  style: TravelStyle;
 }
 
 interface TimelineItem {
@@ -35,7 +41,43 @@ interface ItineraryDay {
   title: string;
   weather: string;
   totalDayBudget: number;
+  aiTip?: string;
   timeline: TimelineItem[];
+}
+
+interface TripSummary {
+  destination: string;
+  totalDays: number;
+  travelers: number;
+  totalBudget: number;
+  averageDailyBudget: number;
+  travelStyle: TravelStyle;
+}
+
+interface ApiTimelineItem {
+  time: string;
+  title: string;
+  location: string;
+  description: string;
+  duration: string;
+  cost: string;
+  type: ApiTimelineType;
+  tip: string;
+}
+
+interface ApiItineraryDay {
+  day: number;
+  date: string;
+  title: string;
+  weather: string;
+  dailyBudget: number;
+  aiTip: string;
+  timeline: ApiTimelineItem[];
+}
+
+interface ApiTripResponse {
+  summary: TripSummary;
+  itinerary: ApiItineraryDay[];
 }
 
 // ── Destination data ──────────────────────────────────────────────────────────
@@ -277,6 +319,107 @@ function buildItinerary(form: FormData, dayTitles: readonly string[], arrival: s
   });
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isApiTimelineType(value: unknown): value is ApiTimelineType {
+  return value === "food" || value === "sightseeing" || value === "transport" || value === "leisure";
+}
+
+function isApiTimelineItem(value: unknown): value is ApiTimelineItem {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.time === "string" &&
+    typeof value.title === "string" &&
+    typeof value.location === "string" &&
+    typeof value.description === "string" &&
+    typeof value.duration === "string" &&
+    typeof value.cost === "string" &&
+    isApiTimelineType(value.type) &&
+    typeof value.tip === "string"
+  );
+}
+
+function isApiItineraryDay(value: unknown): value is ApiItineraryDay {
+  if (!isRecord(value) || !Array.isArray(value.timeline)) return false;
+  return (
+    typeof value.day === "number" &&
+    typeof value.date === "string" &&
+    typeof value.title === "string" &&
+    typeof value.weather === "string" &&
+    typeof value.dailyBudget === "number" &&
+    typeof value.aiTip === "string" &&
+    value.timeline.every(isApiTimelineItem)
+  );
+}
+
+function isApiTripResponse(value: unknown): value is ApiTripResponse {
+  if (!isRecord(value) || !isRecord(value.summary) || !Array.isArray(value.itinerary)) return false;
+  return (
+    typeof value.summary.destination === "string" &&
+    typeof value.summary.totalDays === "number" &&
+    typeof value.summary.travelers === "number" &&
+    typeof value.summary.totalBudget === "number" &&
+    typeof value.summary.averageDailyBudget === "number" &&
+    (value.summary.travelStyle === "luxury" ||
+      value.summary.travelStyle === "budget" ||
+      value.summary.travelStyle === "adventure" ||
+      value.summary.travelStyle === "family" ||
+      value.summary.travelStyle === "romantic") &&
+    value.itinerary.every(isApiItineraryDay)
+  );
+}
+
+function normalizeApiItinerary(response: ApiTripResponse): ItineraryDay[] {
+  return response.itinerary.map((day) => ({
+    day: day.day,
+    date: day.date,
+    title: day.title,
+    weather: day.weather,
+    totalDayBudget: day.dailyBudget,
+    aiTip: day.aiTip,
+    timeline: day.timeline.map((item) => ({
+      ...item,
+      type: item.type === "sightseeing" ? "sight" : item.type,
+    })),
+  }));
+}
+
+const openAiBillingRequiredMessage =
+  "AI გენერაციისთვის საჭიროა OpenAI Billing-ის გააქტიურება. დროებით ნაჩვენებია ლოკალური გეგმა.";
+
+function isOpenAiBillingMessage(apiMessage?: string): boolean {
+  if (!apiMessage) return false;
+  const normalizedMessage = apiMessage.toLowerCase();
+  return (
+    apiMessage === openAiBillingRequiredMessage ||
+    normalizedMessage.includes("insufficient_quota") ||
+    normalizedMessage.includes("billing") ||
+    normalizedMessage.includes("quota")
+  );
+}
+
+function getFallbackErrorMessage(lang: Lang, apiMessage?: string): string {
+  if (isOpenAiBillingMessage(apiMessage)) return openAiBillingRequiredMessage;
+  if (lang === "ka") return "AI გენერაცია დროებით მიუწვდომელია. ნაჩვენებია ლოკალური გეგმა.";
+  if (lang === "ru") return "AI-генерация временно недоступна. Показан локальный план.";
+  return "AI generation is temporarily unavailable. Showing a local fallback plan.";
+}
+
+function buildFallbackSummary(form: FormData, days: ItineraryDay[]): TripSummary {
+  const totalBudget = Number(form.budget) || 0;
+
+  return {
+    destination: form.destination,
+    totalDays: days.length,
+    travelers: Number(form.travelers) || 1,
+    totalBudget,
+    averageDailyBudget: days.length > 0 ? Math.round(totalBudget / days.length) : 0,
+    travelStyle: form.style,
+  };
+}
+
 const typeConfigBase = {
   food: { icon: Utensils, bg: "bg-amber-500/10", text: "text-amber-500" },
   sight: { icon: Camera, bg: "bg-blue-500/10", text: "text-blue-500" },
@@ -285,7 +428,9 @@ const typeConfigBase = {
 };
 
 export default function PlannerForm() {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
+  const { user, session, refreshProfile } = useAuth();
+  const router = useRouter();
   const pl = t.planner;
 
   const typeConfig = {
@@ -302,22 +447,79 @@ export default function PlannerForm() {
   });
   const [loading, setLoading] = useState(false);
   const [itinerary, setItinerary] = useState<ItineraryDay[]>([]);
+  const [summary, setSummary] = useState<TripSummary | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeDay, setActiveDay] = useState(0);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
 
-  const tripDays = itinerary.length;
-  const totalBudget = Number(form.budget) || 0;
+  const formBudget = Number(form.budget);
+  const formTravelers = Number(form.travelers);
+  const tripDays = summary?.totalDays ?? itinerary.length;
+  const totalBudget = summary?.totalBudget ?? (Number.isFinite(formBudget) ? formBudget : 0);
+  const summaryDestination = summary?.destination || form.destination;
+  const summaryTravelers = summary?.travelers ?? (Number.isFinite(formTravelers) ? formTravelers : 1);
+  const summaryStyle = summary?.travelStyle ?? form.style;
   const currentDay = itinerary[activeDay];
 
   const handleGenerate = async () => {
-    if (!form.destination) return;
+    if (!form.destination || !form.startDate || !form.endDate || !form.budget) return;
+    if (!user || !session?.access_token) {
+      setErrorMessage(t.auth.loginRequired);
+      router.push("/login");
+      return;
+    }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 2200));
-    const days = buildItinerary(form, pl.dayTitles, pl.dayArrival, pl.dayDeparture);
-    setItinerary(days);
-    setActiveDay(0);
-    setExpandedItems(new Set());
-    setLoading(false);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch("/api/generate-trip", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          destination: form.destination,
+          startDate: form.startDate,
+          endDate: form.endDate,
+          budget: Number(form.budget),
+          travelers: Number(form.travelers),
+          travelStyle: form.style,
+          language: lang,
+        }),
+      });
+
+      const payload: unknown = await response.json();
+
+      if (!response.ok) {
+        const apiError = isRecord(payload) && typeof payload.error === "string" ? payload.error : undefined;
+        if (response.status === 400 || response.status === 401 || response.status === 403) {
+          setErrorMessage(apiError || getFallbackErrorMessage(lang));
+          setItinerary([]);
+          setSummary(null);
+          return;
+        }
+        throw new Error(apiError);
+      }
+
+      if (!isApiTripResponse(payload)) {
+        throw new Error("Invalid itinerary response.");
+      }
+
+      setSummary(payload.summary);
+      setItinerary(normalizeApiItinerary(payload));
+      await refreshProfile();
+    } catch (error) {
+      const apiMessage = error instanceof Error ? error.message : undefined;
+      const fallbackDays = buildItinerary(form, pl.dayTitles, pl.dayArrival, pl.dayDeparture);
+      setErrorMessage(getFallbackErrorMessage(lang, apiMessage));
+      setSummary(buildFallbackSummary(form, fallbackDays));
+      setItinerary(fallbackDays);
+    } finally {
+      setActiveDay(0);
+      setExpandedItems(new Set());
+      setLoading(false);
+    }
   };
 
   const toggleItem = (idx: number) => {
@@ -390,7 +592,7 @@ export default function PlannerForm() {
             </div>
           </div>
         </div>
-        <button onClick={handleGenerate} disabled={loading || !form.destination}
+        <button onClick={handleGenerate} disabled={loading || !form.destination || !form.startDate || !form.endDate || !form.budget}
           className="mt-6 w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold text-base hover:shadow-xl hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-3">
           {loading ? (
             <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{pl.generatingBtn}</>
@@ -398,6 +600,11 @@ export default function PlannerForm() {
             <><Sparkles className="w-5 h-5" />{pl.generateBtn}</>
           )}
         </button>
+        {errorMessage && (
+          <div className="mt-4 rounded-2xl border border-amber-200/70 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
+            {errorMessage}
+          </div>
+        )}
       </div>
 
       {/* ── Generated Itinerary ── */}
@@ -411,8 +618,8 @@ export default function PlannerForm() {
                 <Compass className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-bold dark:text-white text-slate-900">{form.destination} — {pl.resultsTitle}</h3>
-                <p className="text-sm dark:text-slate-400 text-slate-500">{tripDays}-{pl.resultsSub} · {travelStyles.find(s => s.value === form.style)?.label}</p>
+                <h3 className="text-xl font-bold dark:text-white text-slate-900">{summaryDestination} — {pl.resultsTitle}</h3>
+                <p className="text-sm dark:text-slate-400 text-slate-500">{tripDays}-{pl.resultsSub} · {travelStyles.find(s => s.value === summaryStyle)?.label}</p>
               </div>
             </div>
 
@@ -421,7 +628,7 @@ export default function PlannerForm() {
               {[
                 { label: pl.totalBudget, value: totalBudget > 0 ? `${totalBudget}₾` : "—", icon: Banknote },
                 { label: pl.dailyBudget, value: currentDay?.totalDayBudget > 0 ? `${currentDay.totalDayBudget}₾` : "—", icon: Clock },
-                { label: pl.travelers, value: `${form.travelers}`, icon: Users },
+                { label: pl.travelers, value: `${summaryTravelers}`, icon: Users },
                 { label: pl.totalDays, value: `${tripDays}`, icon: Calendar },
               ].map((stat) => (
                 <div key={stat.label} className="p-4 rounded-2xl dark:bg-white/5 bg-slate-50 dark:border-white/5 border border-slate-200/80 text-center">
@@ -575,9 +782,10 @@ export default function PlannerForm() {
                       <div className="min-w-0">
                         <div className="text-xs font-semibold dark:text-slate-400 text-slate-500 mb-0.5">{pl.aiTipLabel}</div>
                         <div className="text-sm dark:text-slate-300 text-slate-600">
-                          {currentDay.weather.includes("☀️") ? pl.aiTipSunny :
+                          {currentDay.aiTip ||
+                           (currentDay.weather.includes("☀️") ? pl.aiTipSunny :
                            currentDay.weather.includes("🌦") ? pl.aiTipRainy :
-                           pl.aiTipDefault}
+                           pl.aiTipDefault)}
                         </div>
                       </div>
                     </div>

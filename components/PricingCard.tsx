@@ -5,6 +5,7 @@ import { Check, X, Sparkles } from "lucide-react";
 import Link from "next/link";
 import type { PricingPlan } from "@/data/pricing";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface PricingCardProps {
   plan: PricingPlan;
@@ -13,10 +14,12 @@ interface PricingCardProps {
 
 export default function PricingCard({ plan, index = 0 }: PricingCardProps) {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const planId = plan.id as "starter" | "pro" | "agency";
   const localPlan = t.pricingPlans[planId];
   const price = plan.price;
   const period = plan.id === "starter" ? t.common.free : plan.period;
+  const ctaHref = plan.id === "starter" ? (user ? "/dashboard" : "/register") : `/checkout?plan=${plan.id}`;
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -56,7 +59,7 @@ export default function PricingCard({ plan, index = 0 }: PricingCardProps) {
 
       {/* CTA */}
       <Link
-        href={plan.id === "agency" ? "/contact" : "/planner"}
+        href={ctaHref}
         className={`block w-full text-center py-3 rounded-2xl text-sm font-semibold transition-all duration-200 mb-6 ${
           plan.recommended
             ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5"
