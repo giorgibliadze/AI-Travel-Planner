@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
+import { SITE_URL } from "@/lib/config";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import type { Profile, ProfileInsert } from "@/types/auth";
 
@@ -19,6 +20,11 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+const getRedirectOrigin = () =>
+  typeof window !== "undefined"
+    ? window.location.origin
+    : SITE_URL;
 
 function getProfileDefaults(user: User): ProfileInsert {
   return {
@@ -113,10 +119,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    const redirectTo = getRedirectOrigin();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${redirectTo}/dashboard`,
         data: {
           full_name: fullName,
         },
@@ -146,8 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
+    const redirectTo = getRedirectOrigin();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/login`,
+      redirectTo: `${redirectTo}/reset-password`,
     });
     return error?.message ?? null;
   };

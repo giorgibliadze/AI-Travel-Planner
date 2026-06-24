@@ -19,6 +19,8 @@ OPENAI_API_KEY=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SITE_URL=
+NEXT_PUBLIC_APP_URL=
 ```
 
 Only the `NEXT_PUBLIC_` keys are exposed to the browser. Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only.
@@ -30,12 +32,7 @@ Only the `NEXT_PUBLIC_` keys are exposed to the browser. Keep `SUPABASE_SERVICE_
 3. Add your Google OAuth client ID and client secret.
 4. In Google Cloud Console, add the Supabase callback URL from the Google provider screen.
 5. In Supabase **Authentication > URL Configuration**, add your local and production site URLs.
-
-Typical local URL:
-
-```text
-http://localhost:3000
-```
+6. Set the production URL to `https://ai-travel-planner-1t7z.vercel.app` in Vercel as `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_APP_URL`.
 
 ## Email Confirmation During Local Testing
 

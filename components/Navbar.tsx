@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Plane, ChevronDown } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
@@ -21,6 +21,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const navLinks = [
     { href: "/", label: t.nav.home },
@@ -44,6 +45,12 @@ export default function Navbar() {
     if (langOpen) document.addEventListener("click", close);
     return () => document.removeEventListener("click", close);
   }, [langOpen]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <>
@@ -138,7 +145,7 @@ export default function Navbar() {
               </Link>
               {user ? (
                 <button
-                  onClick={() => void signOut()}
+                  onClick={() => void handleSignOut()}
                   className="hidden md:inline-flex px-3 py-2 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-slate-300 text-slate-600 text-sm font-semibold"
                 >
                   {t.nav.logout}
@@ -215,7 +222,7 @@ export default function Navbar() {
               </Link>
               {user ? (
                 <button
-                  onClick={() => void signOut()}
+                  onClick={() => void handleSignOut()}
                   className="px-4 py-3 rounded-xl dark:bg-white/5 bg-slate-100 dark:text-slate-300 text-slate-600 text-sm font-semibold text-center"
                 >
                   {t.nav.logout}
