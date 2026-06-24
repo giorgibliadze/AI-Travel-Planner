@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { SITE_URL } from "@/lib/config";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import type { Profile, ProfileInsert } from "@/types/auth";
 
@@ -20,11 +19,6 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-
-const getRedirectOrigin = () =>
-  typeof window !== "undefined"
-    ? window.location.origin
-    : SITE_URL;
 
 function getProfileDefaults(user: User): ProfileInsert {
   return {
@@ -119,12 +113,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectTo = getRedirectOrigin();
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_SITE_URL;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${redirectTo}/dashboard`,
+        emailRedirectTo: `${origin}/dashboard`,
         data: {
           full_name: fullName,
         },
@@ -137,26 +134,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_SITE_URL;
     await supabase.auth.signOut();
     setSession(null);
     setUser(null);
     setProfile(null);
+    if (typeof window !== "undefined") {
+      window.location.assign(`${origin}/`);
+    }
   };
 
   const signInWithGoogle = async () => {
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_SITE_URL;
+    const redirectTo = `${origin}/dashboard`;
+    console.log("OAuth redirect:", redirectTo);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo,
       },
     });
     return error?.message ?? null;
   };
 
   const resetPassword = async (email: string) => {
-    const redirectTo = getRedirectOrigin();
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_SITE_URL;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${redirectTo}/reset-password`,
+      redirectTo: `${origin}/reset-password`,
     });
     return error?.message ?? null;
   };

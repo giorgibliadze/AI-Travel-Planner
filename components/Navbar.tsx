@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Plane, ChevronDown } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
@@ -21,7 +21,6 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
 
   const navLinks = [
     { href: "/", label: t.nav.home },
@@ -48,8 +47,6 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/login");
-    router.refresh();
   };
 
   return (
