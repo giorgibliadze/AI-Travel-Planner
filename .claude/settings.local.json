@@ -3,7 +3,7 @@
     "allow": [
       "Bash(node -e \"const l = require\\('./node_modules/lucide-react'\\); console.log\\(Object.keys\\(l\\).filter\\(k => k.includes\\('Inst'\\) || k.includes\\('Face'\\) || k.includes\\('You'\\) || k.includes\\('Social'\\) || k.includes\\('Twitter'\\)\\)\\)\")",
       "Bash(npm run *)",
-      "Bash(curl -s http://localhost:3000)",
+      "Bash(curl -s https://ai-travel-planner-1t7z.vercel.app/)",
       "Bash(pkill -f \"dental.*next\")",
       "Bash(curl -s http://localhost:3001)",
       "mcp__Claude_Preview__preview_start",
