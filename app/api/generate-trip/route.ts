@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { createServerSupabaseClient, getBearerToken } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { SUPABASE_URL } from "@/lib/config";
 import type { Profile, ProfileInsert } from "@/types/auth";
 
 type TravelStyle = "luxury" | "budget" | "adventure" | "family" | "romantic";
@@ -381,7 +382,7 @@ export async function POST(request: Request) {
 
   try {
     const supabase = createServerSupabaseClient(token);
-    console.log("SUPABASE URL", process.env.NEXT_PUBLIC_SUPABASE_URL);
+    console.log("SUPABASE URL", SUPABASE_URL);
 
     const { data: authData, error: authError } = await supabase.auth.getUser(token);
 
